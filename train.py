@@ -1,11 +1,10 @@
+import argparse
 import os
 import logging
-import sys
 import torch
 import numpy as np
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
-from torch import tensor
 
 from psbody.mesh import Mesh, MeshViewers
 import mesh_operations
@@ -40,26 +39,33 @@ def save_model(coma, optimizer, epoch, train_loss, val_loss, checkpoint_dir):
     torch.save(checkpoint, os.path.join(checkpoint_dir, 'checkpoint_'+ str(epoch)+'.pt'))
 
 
-def main(config_fname):
-    if not os.path.exists(config_fname):
-        print('Config not found' + config_fname)
+def main(args):
+    if not os.path.exists(args.conf):
+        print('Config not found' + args.conf)
 
-    config = read_config(config_fname)
+    config = read_config(args.conf)
 
     print('Initializing parameters')
     template_file_path = config['template_fname']
     template_mesh = Mesh(filename=template_file_path)
 
-    checkpoint_dir = config['checkpoint_dir']
+    if args.checkpoint_dir:
+        checkpoint_dir = args.checkpoint_dir
+    else:
+        checkpoint_dir = config['checkpoint_dir']
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
+    visualize = config['visualize']
     output_dir = config['visual_output_dir']
+    if visualize is True and not output_dir:
+        print('No visual output directory is provided. Checkpoint directory will be used to store the visual results')
+        output_dir = checkpoint_dir
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     eval_flag = config['eval']
-    visualize = config['visualize']
     lr = config['learning_rate']
     lr_decay = config['learning_rate_decay']
     weight_decay = config['weight_decay']
@@ -79,10 +85,14 @@ def main(config_fname):
     num_nodes = [len(M[i].v) for i in range(len(M))]
 
     print('Loading Dataset')
-    data_dir = config['data_dir']
+    if args.data_dir:
+        data_dir = args.data_dir
+    else:
+        data_dir = config['data_dir']
+
     normalize_transform = Normalize()
-    dataset = ComaDataset(data_dir, dtype='train', split='expression', split_term='cheeks_in', pre_transform=normalize_transform)
-    dataset_test = ComaDataset(data_dir, dtype='test', split='expression', split_term='cheeks_in', pre_transform=normalize_transform)
+    dataset = ComaDataset(data_dir, dtype='train', split=args.split, split_term=args.split_term, pre_transform=normalize_transform)
+    dataset_test = ComaDataset(data_dir, dtype='test', split=args.split, split_term=args.split_term, pre_transform=normalize_transform)
     train_loader = DataLoader(dataset, batch_size=16, shuffle=True, num_workers=workers_thread)
     test_loader = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=workers_thread)
 
@@ -179,9 +189,22 @@ def evaluate(coma, output_dir, test_loader, dataset, template_mesh, device, visu
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        pkg_path, _ = os.path.split(os.path.realpath(__file__))
-        config_fname = os.path.join(pkg_path, 'default.cfg')
-    else:
-        config_fname = str(sys.argv[1])
-    main(config_fname)
+
+    parser = argparse.ArgumentParser(description='Pytorch Trainer for Convolutional Mesh Autoencoders')
+    parser.add_argument('-c', '--conf', help='path of config file')
+    parser.add_argument('-s', '--split', default='sliced', help='split can be sliced, expression or identity ')
+    parser.add_argument('-st', '--split_term', default='sliced', help='split term can be sliced, expression name '
+                                                               'or identity name')
+    parser.add_argument('-d', '--data_dir', help='path where the downloaded data is stored')
+    parser.add_argument('-cp', '--checkpoint_dir', help='path where checkpoints file need to be stored')
+
+    args = parser.parse_args()
+
+    if args.conf is None:
+        args.conf = os.path.join(os.path.dirname(__file__), 'default.cfg')
+        print('configuration file not specified, trying to load '
+              'it from current directory: %s', args.conf)
+    if args.split is None or args.split_term is None:
+        raise Exception('split and split_term needs to be provided. Please check ReadMe for more details')
+
+    main(args)

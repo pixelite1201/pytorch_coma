@@ -1,3 +1,4 @@
+import argparse
 import glob
 import numpy as np
 import torch
@@ -121,5 +122,22 @@ def prepare_identity_dataset(path):
     for ids in test_ids:
         ComaDataset(path, split='identity', split_term=ids, pre_transform=Normalize())
 
+
 if __name__ == '__main__':
-    prepare_identity_dataset('/is/ps2/ppatel/py_coma_data/alignment_alldata/mesh_raw')
+
+    parser = argparse.ArgumentParser(description='Data preparation for Convolutional Mesh Autoencoders')
+    parser.add_argument('-s', '--split', default='sliced', help='split can be sliced, expression or identity ')
+    parser.add_argument('-d', '--data_dir', help='path where the downloaded data is stored')
+
+    args = parser.parse_args()
+    split = args.split
+    data_dir = args.data_dir
+    if split == 'sliced':
+        prepare_sliced_dataset(data_dir)
+    elif split == 'expressioin':
+        prepare_expression_dataset(data_dir)
+    elif split == 'identity':
+        prepare_identity_dataset(data_dir)
+    else:
+        raise Exception("Only sliced, expression and identity split are supported")
+

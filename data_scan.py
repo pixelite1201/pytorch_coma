@@ -1,3 +1,4 @@
+import argparse
 import os
 import glob
 import numpy as np
@@ -53,6 +54,7 @@ class ScanDataset(Dataset):
         norm_path = self.processed_paths[-1]
         norm_dict = torch.load(norm_path)
         self.mean, self.std = norm_dict['mean'], norm_dict['std']
+
 
     @property
     def raw_file_names(self):
@@ -135,4 +137,19 @@ def prepare_identity_dataset(path):
 
 
 if __name__ == '__main__':
-    prepare_identity_dataset('/is/ps2/ppatel/py_coma_data/alignment_alldata/')
+
+    parser = argparse.ArgumentParser(description='Data preparation for Convolutional Mesh Autoencoders')
+    parser.add_argument('-s', '--split', default='sliced', help='split can be sliced, expression or identity ')
+    parser.add_argument('-d', '--data_dir', help='path where the downloaded data is stored')
+
+    args = parser.parse_args()
+    split = args.split
+    data_dir = args.data_dir
+    if split == 'sliced':
+        prepare_sliced_dataset(data_dir)
+    elif split == 'expressioin':
+        prepare_expression_dataset(data_dir)
+    elif split == 'identity':
+        prepare_identity_dataset(data_dir)
+    else:
+        raise Exception("Only sliced, expression and identity split are supported")
