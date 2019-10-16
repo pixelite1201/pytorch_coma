@@ -138,7 +138,7 @@ def prepare_identity_dataset(path):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Data preparation for Convolutional Mesh Autoencoders')
+    parser = argparse.ArgumentParser(description='Scan Data preparation for Convolutional Mesh Autoencoders')
     parser.add_argument('-s', '--split', default='sliced', help='split can be sliced, expression or identity ')
     parser.add_argument('-d', '--data_dir', help='path where the downloaded data is stored')
 

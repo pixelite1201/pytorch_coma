@@ -1,3 +1,4 @@
+import argparse
 import os
 import glob
 import numpy as np
@@ -109,14 +110,24 @@ class AmassDataset(Dataset):
 
         return data
 
-# from psbody.mesh import Mesh
-# from torch_geometric.data import DataLoader
-# if __name__ == '__main__':
-#     dataset = AmassDataset('/is/ps2/ppatel/py_coma_data/amass_coma_humaneva','/is/ps2/ppatel/py_coma_data/humaneva/stage_III/train',
-#                  '/is/ps2/ppatel/amass_body_model/smplh/male/model.npz', '/is/ps2/ppatel/py_coma_data/template_body.obj')
-#     train_loader = DataLoader(dataset, batch_size=16, shuffle=True, num_workers=4)
-#     template_mesh = Mesh(filename='/is/ps2/ppatel/py_coma_data/template_body.obj')
-#     for data in train_loader:
-#         Mesh(v=data.x, f=template_mesh.f).show()
 
+if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser(description='Amass Data preparation for Convolutional Mesh Autoencoders')
+    parser.add_argument('-r', '--root_dir', default='sliced', help='output files will be stored here')
+    parser.add_argument('-d', '--data_dir', help='path where the amass raw data is stored')
+    parser.add_argument('-bm', '--bm_path', help='path where the smpl body model is stored')
+    parser.add_argument('-t', '--template', default='./template/template_body.obj',
+                        help='path where the body template file is stored')
+
+    args = parser.parse_args()
+    dataset = AmassDataset(args.root_dir, args.data_dir, args.bm_path, args.template)
+
+    # Uncomment following lines to visualize the dataset
+
+    # from psbody.mesh import Mesh
+    # from torch_geometric.data import DataLoader
+    # train_loader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
+    # template_mesh = Mesh(filename=args.template)
+    # for data in train_loader:
+    #     Mesh(v=data.x, f=template_mesh.f).show()

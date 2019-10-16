@@ -1,6 +1,5 @@
 import argparse
 import os
-import logging
 import torch
 import numpy as np
 import torch.nn.functional as F
@@ -167,6 +166,7 @@ def train(coma, train_loader, len_dataset, optimizer, device):
 def evaluate(coma, output_dir, test_loader, dataset, template_mesh, device, visualize=False):
     coma.eval()
     total_loss = 0
+    meshviewer = MeshViewers(shape=(1, 2))
     for i, data in enumerate(test_loader):
         data = data.to(device)
         with torch.no_grad():
@@ -175,15 +175,14 @@ def evaluate(coma, output_dir, test_loader, dataset, template_mesh, device, visu
         total_loss += data.num_graphs * loss.item()
 
         if visualize and i % 100 == 0:
-            meshviewer = MeshViewers(shape=(1, 2))
             save_out = out.detach().cpu().numpy()
             save_out = save_out*dataset.std.numpy()+dataset.mean.numpy()
             expected_out = (data.y.detach().cpu().numpy())*dataset.std.numpy()+dataset.mean.numpy()
             result_mesh = Mesh(v=save_out, f=template_mesh.f)
             expected_mesh = Mesh(v=expected_out, f=template_mesh.f)
-            meshviewer[0][0].set_static_meshes([result_mesh])
-            meshviewer[0][1].set_static_meshes([expected_mesh])
-            meshviewer[0][0].save_snapshot(os.path.join(output_dir, 'file'+str(i)+'.png'), blocking=True)
+            meshviewer[0][0].set_dynamic_meshes([result_mesh])
+            meshviewer[0][1].set_dynamic_meshes([expected_mesh])
+            meshviewer[0][0].save_snapshot(os.path.join(output_dir, 'file'+str(i)+'.png'), blocking=False)
 
     return total_loss/len(dataset)
 
@@ -203,8 +202,6 @@ if __name__ == '__main__':
     if args.conf is None:
         args.conf = os.path.join(os.path.dirname(__file__), 'default.cfg')
         print('configuration file not specified, trying to load '
-              'it from current directory: %s', args.conf)
-    if args.split is None or args.split_term is None:
-        raise Exception('split and split_term needs to be provided. Please check ReadMe for more details')
+              'it from current directory', args.conf)
 
     main(args)
