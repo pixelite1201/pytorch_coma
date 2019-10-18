@@ -7,7 +7,7 @@ This code is tested on Pytorch versoin 1.3. Requirments can be install by runnin
 
       pip install -r requirements.txt
     
-Install mesh processing libraries from [MPI-IS/mesh](https://github.com/MPI-IS/mesh)
+Install mesh processing libraries from [MPI-IS/mesh](https://github.com/MPI-IS/mesh). Note that the python3 version of mesh package library is needed for this.
 
 ## Train
 To start the training, follow these steps
