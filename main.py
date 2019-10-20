@@ -121,7 +121,7 @@ def main(args):
     coma.to(device)
 
     if eval_flag:
-        val_loss = evaluate(coma, output_dir, test_loader, dataset_test, template_mesh, device)
+        val_loss = evaluate(coma, output_dir, test_loader, dataset_test, template_mesh, device, visualize)
         print('val loss', val_loss)
         return
 
