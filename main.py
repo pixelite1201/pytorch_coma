@@ -71,6 +71,7 @@ def main(args):
     total_epochs = config['epoch']
     workers_thread = config['workers_thread']
     opt = config['optimizer']
+    batch_size = config['batch_size']
     val_losses, accs, durations = [], [], []
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -92,7 +93,7 @@ def main(args):
     normalize_transform = Normalize()
     dataset = ComaDataset(data_dir, dtype='train', split=args.split, split_term=args.split_term, pre_transform=normalize_transform)
     dataset_test = ComaDataset(data_dir, dtype='test', split=args.split, split_term=args.split_term, pre_transform=normalize_transform)
-    train_loader = DataLoader(dataset, batch_size=16, shuffle=True, num_workers=workers_thread)
+    train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers_thread)
     test_loader = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=workers_thread)
 
     print('Loading model')
@@ -150,9 +151,7 @@ def main(args):
 def train(coma, train_loader, len_dataset, optimizer, device):
     coma.train()
     total_loss = 0
-    count=0
     for data in train_loader:
-        count+=1
         data = data.to(device)
         optimizer.zero_grad()
         out = coma(data)
