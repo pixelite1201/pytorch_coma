@@ -1,6 +1,6 @@
 torch
-torch_geometric
-torch_sparse
-torch_cluster
+torch-scatter
+torch-sparse
+torch-cluster
+torch-geometric
 tqdm
-human_body_prior
