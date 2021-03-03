@@ -3,7 +3,7 @@
 This is the reimplementation of [COMA](https://github.com/anuragranj/coma) code in Pytorch.
 Please follow the licensing rights of the authors if you use the code.
 ## Requirements
-This code is tested on Pytorch versoin 1.3. Requirments can be install by running
+This code is tested on Python3.6, Pytorch versoin 1.3. Requirments can be install by running
 
       pip install -r requirements.txt
     
