@@ -1,3 +1,6 @@
+# Update
+This repository is no longer maintaned.
+
 # Reimplementation of COMA in pytorch
 
 This is the reimplementation of [COMA](https://github.com/anuragranj/coma) code in Pytorch.
